@@ -1,0 +1,67 @@
+import nodemailer from "nodemailer";
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+
+    const { name, email, phone, company, website, subject, message } = body;
+
+    // Validate required fields
+    if (!name || !email || !subject || !message) {
+      return new Response(JSON.stringify({ error: "Missing required fields." }), {
+        status: 400,
+      });
+    }
+
+    // Validate SMTP credentials exist
+    if (
+      !process.env.SMTP_HOST ||
+      !process.env.SMTP_PORT ||
+      !process.env.SMTP_USER ||
+      !process.env.SMTP_PASS
+    ) {
+      console.error("Missing SMTP env variables");
+      return new Response(JSON.stringify({ error: "Email service not configured." }), {
+        status: 500,
+      });
+    }
+
+    // SMTP Transport
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: true, // port 465 uses SSL
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    // Email content
+    await transporter.sendMail({
+      from: `"${name}" <${process.env.SMTP_USER}>`,
+      replyTo: email,
+      to: process.env.SMTP_USER,
+      subject: `New Contact Form: ${subject}`,
+      text: `
+Name: ${name}
+Email: ${email}
+Phone: ${phone}
+Company: ${company}
+Website: ${website}
+
+Message:
+${message}
+      `,
+    });
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+    });
+  } catch (err) {
+    console.error("Contact form error:", err);
+    return new Response(JSON.stringify({ error: "Failed to send email." }), {
+      status: 500,
+    });
+  }
+}
