@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "RankBoost | Best SEO Services & Experts in 2025",
   description:
-    "Professional SEO service to improve visibility, boost search rankings and drive steady organic traffic for long-term business growth.",
+    "Professional SEO services to improve visibility, boost search rankings and drive steady organic traffic for long-term business growth.",
     alternates: {
     canonical: "https://www.rankboost.africa/seo-services",
   },
